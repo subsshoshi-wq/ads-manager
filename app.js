@@ -1,4 +1,4 @@
-import {createReport} from './report.js';
+import {createReport} from './report.js?v=pdf-table-only-2';
 import {storageKey,validateAd,metrics,seedAds} from './model.js';
 const $=s=>document.querySelector(s);let ads;try{ads=JSON.parse(localStorage.getItem(storageKey))||seedAds();if(!Array.isArray(ads))throw Error();ads=ads.map(validateAd);}catch{ads=seedAds();}let selected=new Set(),filter='all',tab='Campaigns',toastTimer;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const money=v=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v)||0);const num=v=>v==null?'—':Number(v).toLocaleString('en-US');
