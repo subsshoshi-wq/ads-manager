@@ -28,3 +28,5 @@ The October replacement is installed once per browser; the previous list is reta
 - October 16–22: three active messaging ads, $200 lifetime group budget. Estimated spend is $85.71 through October 18 (three full days out of seven). This is a fixed snapshot, not a live spend counter.
 
 Budgets are divided equally, assigning leftover cents to the first ads so each group totals exactly $200. Message counts are simulated at approximately $0.25 each, with whole-message rounding. Reach and impressions remain unspecified. Instagram links identify the supplied posts; captions and media have not been fetched. The same post appearing in two groups remains two separate ads. Lifetime budgets avoid misleading daily rounding ($200 / 7 is approximately $28.57 per group per day).
+
+If an older browser list appears, open **Admin panel → Load my October ads**. This downloads a backup and replaces the current list with the supplied 13 ads. The status bar reads **October ads v2** in this release.

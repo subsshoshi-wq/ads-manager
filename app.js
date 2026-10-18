@@ -32,3 +32,11 @@ $('#exportPdf').onclick=()=>{
   report.focus();
   setTimeout(()=>{if(!report.closed)report.print();},350);
 };
+
+$('#restoreOctober').onclick=()=>{
+  if(!confirm('Replace the current list with your 13 October Instagram ads? A backup of the current list will be downloaded first.'))return;
+  download(JSON.stringify(ads,null,2),'application/json','ads-before-october-reset.json');
+  ads=seedAds();selected.clear();$('#search').value='';$('#adminSearch').value='';filter='all';
+  document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter==='all'));
+  save();toast('Loaded 13 October ads: $400 completed spend + $85.71 estimated active spend.');
+};
