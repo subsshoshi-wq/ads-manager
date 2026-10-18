@@ -11,7 +11,7 @@ test('October groups allocate exactly $200 each with correct messaging costs and
   const group=ads.filter(a=>a.group===`October group ${g}`);
   assert.equal(group.reduce((s,a)=>s+Math.round(a.budget*100),0),20000);
   assert.equal(group.reduce((s,a)=>s+Math.round(a.spent*100),0),g===3?8571:20000);
-  group.forEach(a=>{assert.equal(a.resultType,'Messaging conversations');assert.ok(metrics(a).cost>=.2&&metrics(a).cost<=.3);assert.equal((Date.parse(a.ends)-Date.parse(a.starts))/86400000,6);assert.equal(a.reach,null);assert.equal(a.impressions,null);});
+  group.forEach(a=>{assert.equal(a.resultType,'Messaging conversations');assert.ok(metrics(a).cost>=.2&&metrics(a).cost<=.3);assert.equal((Date.parse(a.ends)-Date.parse(a.starts))/86400000,6);assert.ok(a.reach>=a.results);assert.ok(a.impressions>=a.reach);});
  }
  assert.equal(ads.reduce((s,a)=>s+Math.round(a.spent*100),0),48571);
  assert.equal(ads.filter(a=>a.postUrl.includes('DVbMSPZDysm')).length,2);
@@ -35,4 +35,13 @@ test('manual cost per result overrides calculation and blank uses calculated cos
  assert.equal(metrics({spent:20,results:100}).cost,.2);
  assert.throws(()=>validateAd({name:'Test',costPerResult:-.1}));
  assert.throws(()=>validateAd({name:'Test',costPerResult:'bad'}));
+});
+
+test('simulated metrics vary between ads, remain coherent and survive reload unchanged',()=>{
+ const ads=seedAds();assert.deepEqual(seedAds(),ads);
+ for(const field of ['spent','budget','results','reach','impressions']){assert.ok(new Set(ads.map(a=>a[field])).size>=10);for(const group of new Set(ads.map(a=>a.group)))assert.ok(new Set(ads.filter(a=>a.group===group).map(a=>a[field])).size>1);}
+ assert.ok(new Set(ads.map(a=>metrics(a).cost.toFixed(2))).size>=6);
+ assert.ok(new Set(ads.map(a=>metrics(a).frequency.toFixed(2))).size>=6);
+ assert.ok(new Set(ads.map(a=>metrics(a).cpm.toFixed(2))).size>=6);
+ ads.forEach(a=>{assert.equal(a.costPerResult,null);assert.equal(metrics(a).cost,a.spent/a.results);assert.equal(a.simulated,true);assert.ok(a.results>0);});
 });

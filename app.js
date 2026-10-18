@@ -1,5 +1,5 @@
-import {createReport} from './report.js?v=cost-per-result-1';
-import {storageKey,validateAd,metrics,seedAds,loadAds} from './model.js?v=cost-per-result-1';
+import {createReport} from './report.js?v=varied-metrics-1';
+import {storageKey,validateAd,metrics,seedAds,loadAds} from './model.js?v=varied-metrics-1';
 const $=s=>document.querySelector(s);let ads;try{ads=loadAds(localStorage);}catch{ads=seedAds();}let selected=new Set(),filter='all',tab='Campaigns',toastTimer;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const money=v=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v)||0);const num=v=>v==null?'—':Number(v).toLocaleString('en-US');
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),3000);}

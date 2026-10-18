@@ -32,3 +32,7 @@ Budgets are divided equally, assigning leftover cents to the first ads so each g
 If an older browser list appears, open **Admin panel → Load my October ads**. This downloads a backup and replaces the current list with the supplied 13 ads. The status bar reads **October ads v2** in this release.
 
 The ad form includes an optional **Cost per result ($)** override, used in the dashboard, PDF and CSV. Leave it blank to calculate spending divided by results. Changing this field does not change the number of results or amount spent.
+
+## Varied simulation dataset
+
+The current dataset varies spending and lifetime budgets slightly between posts while preserving each $200 group budget, $200 spend for each completed group, and $85.71 active-group spend. Costs per message vary approximately from $0.22 to $0.29; whole-message counts determine the displayed cost. Reach and impressions are synthetic, with frequency and CPM derived consistently. Values are deterministic and do not randomize on refresh. The dataset update runs once and backs up the previous list under `ads-manager-demo-v1-before-instagram-october-varied-v1`. Later manual edits remain editable and persist normally. These numbers are simulation data, not actual Instagram reporting.
