@@ -1,3 +1,4 @@
+import {createReport} from './report.js';
 import {storageKey,validateAd,metrics,seedAds} from './model.js';
 const $=s=>document.querySelector(s);let ads;try{ads=JSON.parse(localStorage.getItem(storageKey))||seedAds();if(!Array.isArray(ads))throw Error();ads=ads.map(validateAd);}catch{ads=seedAds();}let selected=new Set(),filter='all',tab='Campaigns',toastTimer;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const money=v=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v)||0);const num=v=>v==null?'—':Number(v).toLocaleString('en-US');
@@ -20,3 +21,14 @@ $('#backup').onclick=()=>download(JSON.stringify(ads,null,2),'application/json',
 $('#analyze').onclick=()=>{const list=selected.size?ads.filter(a=>selected.has(a.id)):visible();toast(`${list.length} ads · ${money(list.reduce((s,a)=>s+Number(a.spent||0),0))} spent · ${list.reduce((s,a)=>s+Number(a.results||0),0).toLocaleString()} results`);};
 for(const id of ['abtest','columns','breakdown','grouping','dateButton','view','more','moreTop','actions'])$('#'+id).onclick=()=>toast(({abtest:'Use Duplicate to create an ad variation for your simulation.',columns:'Showing all 15 reporting columns. Scroll horizontally to see more.',breakdown:'This demo shows totals per ad.',grouping:'Switch between Campaigns, Ad sets, and Ads above.',dateButton:'Demo reporting period: September 18 – October 17, 2026.',view:'Your search and delivery filters define the current view.',more:'Manage ads and backups in the Admin panel.',moreTop:'This is a local simulation. No connection to Meta.',actions:'Select an ad, then choose Edit or Duplicate.'})[id]);
 render();renderAdmin();
+
+$('#exportPdf').onclick=()=>{
+  const list=visible().filter(ad=>!selected.size||selected.has(ad.id));
+  if(!list.length){toast('No ads to export. Clear filters or select visible ads.');return;}
+  const report=window.open('','_blank');
+  if(!report){toast('Allow pop-ups for this site to open your PDF report.');return;}
+  report.opener=null;
+  report.document.open();report.document.write(createReport(list));report.document.close();
+  report.focus();
+  setTimeout(()=>{if(!report.closed)report.print();},350);
+};
