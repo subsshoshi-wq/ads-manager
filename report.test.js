@@ -8,3 +8,8 @@ test('report includes metrics, print controls and safe ad text',()=>{
 test('missing metrics and no end date are represented without invented values',()=>{
  const html=createReport([{name:'Example',status:'Off',budgetType:'Shared'}]);assert.ok(html.includes('—'));assert.ok(html.includes('Ongoing'));assert.ok(html.includes('Ad set budget'));assert.ok(!html.includes('NaN'));
 });
+
+test('PDF uses manually entered cost per result including zero',()=>{
+ assert.ok(createReport([{name:'Manual',spent:10,results:100,costPerResult:.29}]).includes('$0.29'));
+ assert.ok(createReport([{name:'Free',spent:10,results:100,costPerResult:0}]).includes('<td>$0.00</td>'));
+});

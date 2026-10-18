@@ -30,3 +30,5 @@ The October replacement is installed once per browser; the previous list is reta
 Budgets are divided equally, assigning leftover cents to the first ads so each group totals exactly $200. Message counts are simulated at approximately $0.25 each, with whole-message rounding. Reach and impressions remain unspecified. Instagram links identify the supplied posts; captions and media have not been fetched. The same post appearing in two groups remains two separate ads. Lifetime budgets avoid misleading daily rounding ($200 / 7 is approximately $28.57 per group per day).
 
 If an older browser list appears, open **Admin panel → Load my October ads**. This downloads a backup and replaces the current list with the supplied 13 ads. The status bar reads **October ads v2** in this release.
+
+The ad form includes an optional **Cost per result ($)** override, used in the dashboard, PDF and CSV. Leave it blank to calculate spending divided by results. Changing this field does not change the number of results or amount spent.

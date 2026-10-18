@@ -27,3 +27,12 @@ test('one-time replacement preserves previous data and subsequent user edits',()
  storage.setItem(storageKey,'[]');assert.deepEqual(loadAds(storage),[]);
 });
 test('rejects unsafe post links',()=>{assert.throws(()=>validateAd({name:'Test',postUrl:'javascript:alert(1)'}));});
+
+test('manual cost per result overrides calculation and blank uses calculated cost',()=>{
+ assert.equal(metrics({spent:20,results:100,costPerResult:.28}).cost,.28);
+ assert.equal(metrics({spent:20,results:100,costPerResult:0}).cost,0);
+ assert.equal(metrics({spent:20,results:100,costPerResult:null}).cost,.2);
+ assert.equal(metrics({spent:20,results:100}).cost,.2);
+ assert.throws(()=>validateAd({name:'Test',costPerResult:-.1}));
+ assert.throws(()=>validateAd({name:'Test',costPerResult:'bad'}));
+});
