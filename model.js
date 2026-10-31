@@ -6,16 +6,17 @@ export const datasetVersionKey=storageKey+'-dataset';
 export const previousAdsKey=storageKey+'-before-'+datasetVersion;
 export const october22MigrationKey=storageKey+'-october-22-ads-added-v1';
 export const october22SpendCorrectionKey=storageKey+'-october-22-spend-corrected-v1';
+export const october22MetricsKey=storageKey+'-october-22-messaging-estimates-v1';
 const groups=[
  {start:'2026-10-02',end:'2026-10-08',status:'Completed',spent:20000,spends:[3280,3360,3315,3405,3265,3375],budgets:[3280,3360,3315,3405,3265,3375],costs:[.23,.27,.24,.29,.22,.26],codes:['DddbNSTDauL','DdZ3X5TDXhN','DdXNtVoiMcC','DdUqv2tCKye','DdSJxuOCFq9','DYM3GDzDziP']},
  {start:'2026-10-09',end:'2026-10-15',status:'Completed',spent:20000,spends:[4870,5135,4960,5035],budgets:[4870,5135,4960,5035],costs:[.26,.24,.28,.23],codes:['DVbMSPZDysm','DVJKrnJFtbT','DUVqwS6jFnp','DUyA2sjjQqi']},
  {start:'2026-10-16',end:'2026-10-22',status:'Active',spent:8571,spends:[2798,2916,2857],budgets:[6530,6805,6665],costs:[.24,.27,.25],codes:['DVbMSPZDysm','DVOUS3QCLxx','DTVWoAqCNA0']}
 ];
-export function october22Ads(){return ['DewR1mKlMnY','Deq_XOuCh_-'].map(code=>({
+export function october22Ads(){return [{code:'DewR1mKlMnY',results:168,reach:8750,impressions:14000},{code:'Deq_XOuCh_-',results:156,reach:8000,impressions:12600}].map(({code,results,reach,impressions})=>({
  id:`october-group-4-${code}`,name:`Instagram post: ${code} · Oct 22–28`,
  postUrl:`https://www.instagram.com/p/${code}/?img_index=1`,group:'October group 4',
  starts:'2026-10-22',ends:'2026-10-28',status:'Completed',enabled:false,
- resultType:'Results',results:null,reach:null,impressions:null,spent:42,budget:42,
+ resultType:'Messaging conversations',results,reach,impressions,spent:42,budget:42,
  budgetType:'Lifetime',costPerResult:null,attribution:'7-day click or 1-day view',draft:false,
  simulated:true
 }));}
@@ -44,9 +45,10 @@ export function loadAds(storage){
   storage.setItem(datasetVersionKey,datasetVersion);
   storage.setItem(october22MigrationKey,'1');
   storage.setItem(october22SpendCorrectionKey,'1');
+  storage.setItem(october22MetricsKey,'1');
   return next;
  }
- if(current===null){storage.setItem(october22MigrationKey,'1');storage.setItem(october22SpendCorrectionKey,'1');return seedAds();}
+ if(current===null){storage.setItem(october22MigrationKey,'1');storage.setItem(october22SpendCorrectionKey,'1');storage.setItem(october22MetricsKey,'1');return seedAds();}
  const parsed=JSON.parse(current);
  if(!Array.isArray(parsed))throw new Error('Invalid saved ads');
  let ads=parsed.map(validateAd);
@@ -68,6 +70,19 @@ export function loadAds(storage){
   });
   storage.setItem(storageKey,JSON.stringify(ads));
   storage.setItem(october22SpendCorrectionKey,'1');
+ }
+ if(storage.getItem(october22MetricsKey)!=='1'){
+  const estimates=new Map(october22Ads().map(ad=>[ad.id,ad]));
+  ads=ads.map(ad=>{
+   const estimate=estimates.get(ad.id);
+   if(!estimate)return ad;
+   const updated={...ad};
+   for(const key of ['results','reach','impressions'])if(updated[key]===null||updated[key]===undefined||updated[key]==='')updated[key]=estimate[key];
+   if(updated.resultType==='Results'||updated.resultType===null||updated.resultType===undefined||updated.resultType==='')updated.resultType='Messaging conversations';
+   return updated;
+  });
+  storage.setItem(storageKey,JSON.stringify(ads));
+  storage.setItem(october22MetricsKey,'1');
  }
  return ads;
 }

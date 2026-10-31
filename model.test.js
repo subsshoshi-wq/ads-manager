@@ -1,4 +1,4 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';import {validateAd,metrics,seedAds,loadAds,storageKey,datasetVersionKey,previousAdsKey,datasetVersion,october22MigrationKey,october22SpendCorrectionKey,october22Ads} from './model.js';
+import {test} from 'node:test';import assert from 'node:assert/strict';import {validateAd,metrics,seedAds,loadAds,storageKey,datasetVersionKey,previousAdsKey,datasetVersion,october22MigrationKey,october22SpendCorrectionKey,october22MetricsKey,october22Ads} from './model.js';
 test('seed ads have unique identities and valid metrics',()=>{const ads=seedAds();assert.equal(ads.length,15);assert.equal(new Set(ads.map(a=>a.id)).size,15);ads.forEach(validateAd);});
 test('rejects invalid imported metrics and missing names',()=>{assert.throws(()=>validateAd({name:'x',spent:-1}));assert.throws(()=>validateAd({name:'x',reach:'bad'}));assert.throws(()=>validateAd({name:' '}));});
 test('calculates frequency, cost per result and CPM',()=>{assert.deepEqual(metrics({reach:100,impressions:200,results:5,spent:20}),{frequency:2,cost:4,cpm:100});assert.deepEqual(metrics({}),{frequency:0,cost:0,cpm:0});});
@@ -52,7 +52,18 @@ test('October 22 posts each cover seven days at $6 per day',()=>{
  assert.deepEqual(ads.map(a=>new URL(a.postUrl).pathname),['/p/DewR1mKlMnY/','/p/Deq_XOuCh_-/']);
  assert.equal(ads.reduce((sum,a)=>sum+a.spent,0),84);
  assert.equal(ads.reduce((sum,a)=>sum+a.budget,0),84);
- ads.forEach(a=>{assert.equal(a.spent,42);assert.equal(a.budget,42);assert.equal(a.status,'Completed');assert.equal(a.starts,'2026-10-22');assert.equal(a.ends,'2026-10-28');assert.equal(a.results,null);assert.equal(a.reach,null);assert.equal(a.impressions,null);});
+ ads.forEach(a=>{assert.equal(a.spent,42);assert.equal(a.budget,42);assert.equal(a.status,'Completed');assert.equal(a.starts,'2026-10-22');assert.equal(a.ends,'2026-10-28');assert.equal(a.resultType,'Messaging conversations');assert.equal(a.simulated,true);assert.ok(a.results>0);assert.ok(a.impressions>=a.reach);});
+ assert.deepEqual(ads.map(a=>[a.results,a.reach,a.impressions]),[[168,8750,14000],[156,8000,12600]]);
+});
+
+test('messaging estimates fill missing values once without replacing saved edits or deleted ads',()=>{
+ const [first]=october22Ads();
+ const existing={...first,name:'My edited ad',resultType:'Results',results:123,reach:null,impressions:'',spent:40};
+ const other={id:'mine',name:'Another ad',results:null,reach:null,impressions:null};
+ const values=new Map([[storageKey,JSON.stringify([existing,other])],[datasetVersionKey,datasetVersion],[october22MigrationKey,'1'],[october22SpendCorrectionKey,'1']]);
+ const storage={getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v)};
+ const loaded=loadAds(storage);assert.equal(loaded.length,2);assert.equal(loaded[0].name,'My edited ad');assert.equal(loaded[0].resultType,'Messaging conversations');assert.equal(loaded[0].results,123);assert.equal(loaded[0].reach,8750);assert.equal(loaded[0].impressions,14000);assert.equal(loaded[0].spent,40);assert.equal(loaded[1].reach,null);assert.equal(storage.getItem(october22MetricsKey),'1');
+ loaded[0].reach=null;storage.setItem(storageKey,JSON.stringify(loaded));assert.equal(loadAds(storage)[0].reach,null);
 });
 test('one-time addition preserves existing ads and later edits and deletions',()=>{
  const original=[{id:'mine',name:'My edited ad',spent:8}];
