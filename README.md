@@ -11,7 +11,7 @@ npm test
 
 The server listens on port 3000 (`PORT` overrides it). Open the app in a browser. Choose **Admin panel → Add ad** to enter ad details. Edit or delete entries in the admin panel; use dashboard switches to change delivery, checkboxes to edit or duplicate, and search/filter buttons to find ads. Report metrics are calculated from the entered values.
 
-Data is stored in the current browser's localStorage. The 13 supplied Instagram ads can be edited or deleted. Export/import a JSON backup in the admin panel; export the current report as CSV from the dashboard. “Publish” only marks local draft records as published in the simulation.
+Data is stored in the current browser's localStorage. The 15 supplied Instagram ads can be edited or deleted. Export/import a JSON backup in the admin panel; export the current report as CSV from the dashboard. “Publish” only marks local draft records as published in the simulation.
 
 The admin panel is not authenticated and data is not shared between browsers. A production multi-user deployment would need backend storage and authentication. The three hierarchy tabs currently display the same ad records with different labels. Date selection, report breakdowns and A/B experiments are explanatory demo controls. Fonts use Segoe UI with system fallbacks, so rendering varies by platform.
 
@@ -36,3 +36,7 @@ The ad form includes an optional **Cost per result ($)** override, used in the d
 ## Varied simulation dataset
 
 The current dataset varies spending and lifetime budgets slightly between posts while preserving each $200 group budget, $200 spend for each completed group, and $85.71 active-group spend. Costs per message vary approximately from $0.22 to $0.29; whole-message counts determine the displayed cost. Reach and impressions are synthetic, with frequency and CPM derived consistently. Values are deterministic and do not randomize on refresh. The dataset update runs once and backs up the previous list under `ads-manager-demo-v1-before-instagram-october-varied-v1`. Later manual edits remain editable and persist normally. These numbers are simulation data, not actual Instagram reporting.
+
+## October 22 ads
+
+Two completed Instagram posts run October 22–28, 2026. Their combined spend is $42 ($6 per day for seven days), split equally at $21 per ad as an estimate. Results, reach and impressions are unspecified. The ads are added once without replacing existing saved ads.

@@ -1,10 +1,10 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';import {validateAd,metrics,seedAds,loadAds,storageKey,datasetVersionKey,previousAdsKey,datasetVersion} from './model.js';
-test('seed ads have unique identities and valid metrics',()=>{const ads=seedAds();assert.equal(ads.length,13);assert.equal(new Set(ads.map(a=>a.id)).size,13);ads.forEach(validateAd);});
+import {test} from 'node:test';import assert from 'node:assert/strict';import {validateAd,metrics,seedAds,loadAds,storageKey,datasetVersionKey,previousAdsKey,datasetVersion,october22MigrationKey} from './model.js';
+test('seed ads have unique identities and valid metrics',()=>{const ads=seedAds();assert.equal(ads.length,15);assert.equal(new Set(ads.map(a=>a.id)).size,15);ads.forEach(validateAd);});
 test('rejects invalid imported metrics and missing names',()=>{assert.throws(()=>validateAd({name:'x',spent:-1}));assert.throws(()=>validateAd({name:'x',reach:'bad'}));assert.throws(()=>validateAd({name:' '}));});
 test('calculates frequency, cost per result and CPM',()=>{assert.deepEqual(metrics({reach:100,impressions:200,results:5,spent:20}),{frequency:2,cost:4,cpm:100});assert.deepEqual(metrics({}),{frequency:0,cost:0,cpm:0});});
 
 test('October groups allocate exactly $200 each with correct messaging costs and dates',()=>{
- const ads=seedAds();
+ const ads=seedAds().filter(a=>a.group!=='October group 4');
  assert.equal(ads.filter(a=>a.status==='Completed').length,10);
  assert.equal(ads.filter(a=>a.status==='Active').length,3);
  for(let g=1;g<=3;g++){
@@ -19,7 +19,7 @@ test('October groups allocate exactly $200 each with correct messaging costs and
 test('one-time replacement preserves previous data and subsequent user edits',()=>{
  const values=new Map([[storageKey,JSON.stringify([{name:'Previous ad'}])]]);
  const storage={getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v)};
- assert.equal(loadAds(storage).length,13);
+ assert.equal(loadAds(storage).length,15);
  assert.equal(JSON.parse(storage.getItem(previousAdsKey))[0].name,'Previous ad');
  assert.equal(storage.getItem(datasetVersionKey),datasetVersion);
  const edited=JSON.parse(storage.getItem(storageKey));edited[0].name='Edited by user';storage.setItem(storageKey,JSON.stringify(edited));
@@ -38,10 +38,29 @@ test('manual cost per result overrides calculation and blank uses calculated cos
 });
 
 test('simulated metrics vary between ads, remain coherent and survive reload unchanged',()=>{
- const ads=seedAds();assert.deepEqual(seedAds(),ads);
+ const ads=seedAds().filter(a=>a.group!=='October group 4');assert.deepEqual(seedAds().filter(a=>a.group!=='October group 4'),ads);
  for(const field of ['spent','budget','results','reach','impressions']){assert.ok(new Set(ads.map(a=>a[field])).size>=10);for(const group of new Set(ads.map(a=>a.group)))assert.ok(new Set(ads.filter(a=>a.group===group).map(a=>a[field])).size>1);}
  assert.ok(new Set(ads.map(a=>metrics(a).cost.toFixed(2))).size>=6);
  assert.ok(new Set(ads.map(a=>metrics(a).frequency.toFixed(2))).size>=6);
  assert.ok(new Set(ads.map(a=>metrics(a).cpm.toFixed(2))).size>=6);
  ads.forEach(a=>{assert.equal(a.costPerResult,null);assert.equal(metrics(a).cost,a.spent/a.results);assert.equal(a.simulated,true);assert.ok(a.results>0);});
 });
+
+test('October 22 posts cover seven days at $6 per day combined',()=>{
+ const ads=seedAds().filter(a=>a.group==='October group 4');
+ assert.equal(ads.length,2);
+ assert.deepEqual(ads.map(a=>new URL(a.postUrl).pathname),['/p/DewR1mKlMnY/','/p/Deq_XOuCh_-/']);
+ assert.equal(ads.reduce((sum,a)=>sum+a.spent,0),42);
+ assert.equal(ads.reduce((sum,a)=>sum+a.budget,0),42);
+ ads.forEach(a=>{assert.equal(a.status,'Completed');assert.equal(a.starts,'2026-10-22');assert.equal(a.ends,'2026-10-28');assert.equal(a.results,null);assert.equal(a.reach,null);assert.equal(a.impressions,null);});
+});
+test('one-time addition preserves existing ads and later edits and deletions',()=>{
+ const original=[{id:'mine',name:'My edited ad',spent:8}];
+ const values=new Map([[storageKey,JSON.stringify(original)],[datasetVersionKey,datasetVersion]]);
+ const storage={getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v)};
+ const first=loadAds(storage);assert.equal(first.length,3);assert.equal(first[0].name,'My edited ad');
+ assert.equal(storage.getItem(october22MigrationKey),'1');
+ first[1].spent=19;first.splice(2,1);storage.setItem(storageKey,JSON.stringify(first));
+ const next=loadAds(storage);assert.equal(next.length,2);assert.equal(next[1].spent,19);
+});
+

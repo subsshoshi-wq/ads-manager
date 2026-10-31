@@ -1,5 +1,5 @@
 import {createReport} from './report.js?v=compact-report-1';
-import {storageKey,validateAd,metrics,seedAds,loadAds} from './model.js?v=varied-metrics-1';
+import {storageKey,validateAd,metrics,seedAds,loadAds} from './model.js?v=october-22-ads-1';
 const $=s=>document.querySelector(s);let ads;try{ads=loadAds(localStorage);}catch{ads=seedAds();}let selected=new Set(),filter='all',tab='Campaigns',toastTimer;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const money=v=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v)||0);const num=v=>v==null?'—':Number(v).toLocaleString('en-US');
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),3000);}
@@ -34,9 +34,9 @@ $('#exportPdf').onclick=()=>{
 };
 
 $('#restoreOctober').onclick=()=>{
-  if(!confirm('Replace the current list with your 13 October Instagram ads? A backup of the current list will be downloaded first.'))return;
+  if(!confirm('Replace the current list with your 15 October Instagram ads? A backup of the current list will be downloaded first.'))return;
   download(JSON.stringify(ads,null,2),'application/json','ads-before-october-reset.json');
   ads=seedAds();selected.clear();$('#search').value='';$('#adminSearch').value='';filter='all';
   document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter==='all'));
-  save();toast('Loaded 13 October ads: $400 completed spend + $85.71 estimated active spend.');
+  save();toast('Loaded 15 October ads: $442 completed spend + $85.71 estimated active spend.');
 };
