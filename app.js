@@ -1,5 +1,5 @@
 import {createReport} from './report.js?v=compact-report-1';
-import {storageKey,validateAd,metrics,seedAds,loadAds} from './model.js?v=october-22-ads-1';
+import {storageKey,validateAd,metrics,seedAds,loadAds} from './model.js?v=october-22-ads-2';
 const $=s=>document.querySelector(s);let ads;try{ads=loadAds(localStorage);}catch{ads=seedAds();}let selected=new Set(),filter='all',tab='Campaigns',toastTimer;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const money=v=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v)||0);const num=v=>v==null?'—':Number(v).toLocaleString('en-US');
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),3000);}
@@ -38,5 +38,5 @@ $('#restoreOctober').onclick=()=>{
   download(JSON.stringify(ads,null,2),'application/json','ads-before-october-reset.json');
   ads=seedAds();selected.clear();$('#search').value='';$('#adminSearch').value='';filter='all';
   document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter==='all'));
-  save();toast('Loaded 15 October ads: $442 completed spend + $85.71 estimated active spend.');
+  save();toast('Loaded 15 October ads: $484 completed spend + $85.71 estimated active spend.');
 };

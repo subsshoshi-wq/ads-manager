@@ -39,4 +39,4 @@ The current dataset varies spending and lifetime budgets slightly between posts 
 
 ## October 22 ads
 
-Two completed Instagram posts run October 22–28, 2026. Their combined spend is $42 ($6 per day for seven days), split equally at $21 per ad as an estimate. Results, reach and impressions are unspecified. The ads are added once without replacing existing saved ads.
+Two completed Instagram posts run October 22–28, 2026. Each post spent $42 ($6 per day for seven days), for a combined spend of $84. Results, reach and impressions are unspecified. The ads are added once without replacing existing saved ads.

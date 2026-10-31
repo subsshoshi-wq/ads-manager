@@ -5,6 +5,7 @@ export const datasetVersion='instagram-october-varied-v1';
 export const datasetVersionKey=storageKey+'-dataset';
 export const previousAdsKey=storageKey+'-before-'+datasetVersion;
 export const october22MigrationKey=storageKey+'-october-22-ads-added-v1';
+export const october22SpendCorrectionKey=storageKey+'-october-22-spend-corrected-v1';
 const groups=[
  {start:'2026-10-02',end:'2026-10-08',status:'Completed',spent:20000,spends:[3280,3360,3315,3405,3265,3375],budgets:[3280,3360,3315,3405,3265,3375],costs:[.23,.27,.24,.29,.22,.26],codes:['DddbNSTDauL','DdZ3X5TDXhN','DdXNtVoiMcC','DdUqv2tCKye','DdSJxuOCFq9','DYM3GDzDziP']},
  {start:'2026-10-09',end:'2026-10-15',status:'Completed',spent:20000,spends:[4870,5135,4960,5035],budgets:[4870,5135,4960,5035],costs:[.26,.24,.28,.23],codes:['DVbMSPZDysm','DVJKrnJFtbT','DUVqwS6jFnp','DUyA2sjjQqi']},
@@ -14,9 +15,9 @@ export function october22Ads(){return ['DewR1mKlMnY','Deq_XOuCh_-'].map(code=>({
  id:`october-group-4-${code}`,name:`Instagram post: ${code} · Oct 22–28`,
  postUrl:`https://www.instagram.com/p/${code}/?img_index=1`,group:'October group 4',
  starts:'2026-10-22',ends:'2026-10-28',status:'Completed',enabled:false,
- resultType:'Results',results:null,reach:null,impressions:null,spent:21,budget:21,
+ resultType:'Results',results:null,reach:null,impressions:null,spent:42,budget:42,
  budgetType:'Lifetime',costPerResult:null,attribution:'7-day click or 1-day view',draft:false,
- simulated:true,spendAllocation:'Even split of $42 combined spend; individual amounts are estimates.'
+ simulated:true
 }));}
 export function seedAds(){return [...groups.flatMap((group,groupIndex)=>group.codes.map((code,index)=>{
  const spent=group.spends[index]/100;
@@ -42,18 +43,31 @@ export function loadAds(storage){
   storage.setItem(storageKey,JSON.stringify(next));
   storage.setItem(datasetVersionKey,datasetVersion);
   storage.setItem(october22MigrationKey,'1');
+  storage.setItem(october22SpendCorrectionKey,'1');
   return next;
  }
- if(current===null){storage.setItem(october22MigrationKey,'1');return seedAds();}
+ if(current===null){storage.setItem(october22MigrationKey,'1');storage.setItem(october22SpendCorrectionKey,'1');return seedAds();}
  const parsed=JSON.parse(current);
  if(!Array.isArray(parsed))throw new Error('Invalid saved ads');
- const ads=parsed.map(validateAd);
+ let ads=parsed.map(validateAd);
  if(storage.getItem(october22MigrationKey)!=='1'){
   const ids=new Set(ads.map(ad=>ad.id));
-  const next=[...ads,...october22Ads().filter(ad=>!ids.has(ad.id))];
-  storage.setItem(storageKey,JSON.stringify(next));
+  ads=[...ads,...october22Ads().filter(ad=>!ids.has(ad.id))];
+  storage.setItem(storageKey,JSON.stringify(ads));
   storage.setItem(october22MigrationKey,'1');
-  return next;
+ }
+ if(storage.getItem(october22SpendCorrectionKey)!=='1'){
+  const ids=new Set(october22Ads().map(ad=>ad.id));
+  ads=ads.map(ad=>{
+   if(!ids.has(ad.id))return ad;
+   const updated={...ad};
+   if(Number(ad.spent)===21)updated.spent=42;
+   if(Number(ad.budget)===21&&ad.budgetType==='Lifetime')updated.budget=42;
+   if(updated.spendAllocation==='Even split of $42 combined spend; individual amounts are estimates.')delete updated.spendAllocation;
+   return updated;
+  });
+  storage.setItem(storageKey,JSON.stringify(ads));
+  storage.setItem(october22SpendCorrectionKey,'1');
  }
  return ads;
 }
